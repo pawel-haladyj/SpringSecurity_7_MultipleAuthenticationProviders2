@@ -10,6 +10,7 @@ import pl.haladyj.springsecurity7.entity.Otp;
 import pl.haladyj.springsecurity7.repository.OtpRepository;
 import pl.haladyj.springsecurity7.security.authentication.OtpAuthentication;
 import pl.haladyj.springsecurity7.security.authentication.UsernamePasswordAuthentication;
+import pl.haladyj.springsecurity7.security.managers.TokenManager;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -19,7 +20,7 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.UUID;
 
-@Component
+
 public class UsernamePasswordAuthFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -27,6 +28,9 @@ public class UsernamePasswordAuthFilter extends OncePerRequestFilter {
 
     @Autowired
     private OtpRepository otpRepository;
+
+    @Autowired
+    private TokenManager tokenManager;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -51,7 +55,9 @@ public class UsernamePasswordAuthFilter extends OncePerRequestFilter {
             Authentication authentication = new OtpAuthentication(username,otp);
             authentication = manager.authenticate(authentication);
 
-            response.setHeader("Authorization", "Authorization: " + UUID.randomUUID().toString());
+            String token = UUID.randomUUID().toString();
+            tokenManager.add(token);
+            response.setHeader("Authorization", "Authorization: " + token);
 
         }
 
